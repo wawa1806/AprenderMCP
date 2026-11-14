@@ -96,3 +96,10 @@ async def test_prompt(conectar):
     assert len(r.messages) == 2
     assert server.reglamento() in r.messages[0].content.text
     assert all(m.role in ("user", "assistant") for m in r.messages)
+
+async def test_descripcion_transferir_usa_limite(conectar):
+    """La descripción que ve el agente debe mostrar el límite real, no un número fijo."""
+    async with conectar() as client:
+        r = await client.list_tools()
+    descripcion = next(t.description for t in r.tools if t.name == "transferir")
+    assert f"${server.LIMITE_POR_TRANSFERENCIA:,}" in descripcion

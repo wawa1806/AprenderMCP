@@ -86,17 +86,24 @@ def pedir_confirmacion(origen: str, destino: str, monto: int) -> Elicit[Confirma
     return Elicit(f"¿Deseas transferir ${monto:,} de la cuenta {cuenta_id_origen} a la cuenta de Titular: {CUENTAS[cuenta_id_destino]['titular']} con cuenta: {cuenta_id_destino}?",
         Confirmacion)
 
-@mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": True, "idempotentHint": False, "openWorldHint": False})
+@mcp.tool(
+    annotations={"readOnlyHint": False, "destructiveHint": True, "idempotentHint": False, "openWorldHint": False},
+    # La descripción se arma desde LIMITE_POR_TRANSFERENCIA para que nunca quede desactualizada.
+    description=(
+        "Transfiere un monto de dinero de una cuenta a otra.\n"
+        "La ID de las cuentas debe estar en el formato 'CTA-XXX', donde XXX es un número "
+        "de tres dígitos. Esta función modifica los datos de la base de datos y requiere "
+        "confirmación del usuario antes de realizar la transferencia. "
+        f"Límite: ${LIMITE_POR_TRANSFERENCIA:,} por transferencia. Ver banco://reglamento."
+    ),
+)
 def transferir(
     origen: str,
     destino: str,
     monto: Annotated[int, Field(gt=0)],
     confirmacion: Annotated[ElicitationResult[Confirmacion], Resolve(pedir_confirmacion)],
 ) -> str:
-    """Transfiere un monto de dinero de una cuenta a otra.
-    La ID de las cuentas debe estar en el formato 'CTA-XXX', donde XXX es un número
-    de tres dígitos. Esta función modifica los datos de la base de datos y requiere
-    confirmación del usuario antes de realizar la transferencia. Límite: $200.000 por transferencia. Ver banco://reglamento."""
+    """Mueve el dinero tras validar y recibir la confirmación del usuario (ver `description`)."""
 
     cuenta_id_origen = origen.strip().upper()  # Normaliza la ID de la cuenta
     cuenta_id_destino = destino.strip().upper()  # Normaliza la ID de la cuenta

@@ -1,7 +1,7 @@
 [project]
 name = "aprendermcp"
 version = "0.1.0"
-description = "Add your description here"
+description = "Servidor MCP de operaciones bancarias simuladas con confirmación humana (elicitation)"
 readme = "README.md"
 authors = [
     { name = "Lukas Estay", email = "lukasestay18@gmail.com" }
